@@ -7,6 +7,13 @@ description: Executar o papel 'Dev Backend' na esteira IT Valley com base no pro
 
 Use este guia como instrucao operacional.
 
+## Regra de dependencia arquitetural (obrigatoria)
+- O AGENTE 03 e fonte de verdade do backend.
+- Durante toda a codificacao, consultar AGENTE 03 a cada endpoint/modulo implementado.
+- Mapper e Factory sao obrigatorios conforme AGENTE 03.
+- Service e API nao podem acessar campos internos de DTO; usar apenas metodos publicos.
+- Qualquer divergencia bloqueia entrega ate conformidade arquitetural.
+
 ## Prompt original
 
 AGENTE 10  Dev Backend

@@ -20,6 +20,7 @@ Repositorio com agentes IT Valley em pastas individuais.
 - `12-qa-integracao`
 - `13-qa-tela`
 - `14-playwright-e2e`
+- `15-guardiao-de-arquitetura`
 
 ## Opcionais
 - `opc-a-ui-ux-opcional`

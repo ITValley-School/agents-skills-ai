@@ -1,4 +1,4 @@
-# AGENTES-IA (Codex + Claude Code)
+﻿# AGENTES-IA (Codex + Claude Code)
 
 Estrutura pronta para GitHub com os prompts do documento convertidos para dois formatos:
 
@@ -9,6 +9,9 @@ Cada agente fica em uma pasta separada, incluindo os agentes opcionais.
 
 ## Origem
 - Documento base: `c:/Users/carlo/Downloads/AGENTES-PROMPTS-v3.md.pdf`
+
+## Orquestracao Codex
+- Arquivo de orquestracao: `.codex/AGENTS.md`
 
 ## Agentes incluidos
 - `01-prd-analyst` - AGENTE 01 - PRD Analyst
@@ -25,6 +28,8 @@ Cada agente fica em uma pasta separada, incluindo os agentes opcionais.
 - `12-qa-integracao` - AGENTE 12 - QA Integracao
 - `13-qa-tela` - AGENTE 13 - QA Tela
 - `14-playwright-e2e` - AGENTE 14 - Playwright E2E
+- `15-guardiao-de-arquitetura` - AGENTE 15 - Guardiao de Arquitetura
 - `opc-a-ui-ux-opcional` - OPC-A - UI/UX (opcional)
 - `opc-b-mensageria-opcional` - OPC-B - Mensageria (opcional)
 - `opc-c-engenheiro-de-dados-plus-bi-opcional` - OPC-C - Engenheiro de Dados + BI (opcional)
+

@@ -7,6 +7,11 @@ description: Executar o papel 'Dev Frontend' na esteira IT Valley com base no pr
 
 Use este guia como instrucao operacional.
 
+## Regra de dependencia arquitetural
+- Durante a codificacao, consultar continuamente o AGENTE 03 (contratos backend) e AGENTE 04 (arquitetura frontend).
+- Nao implementar nada que contradiga o AGENTE 03, mesmo no frontend (rotas, payloads, respostas e contratos).
+- Em caso de conflito, parar e pedir ajuste arquitetural antes de continuar.
+
 ## Prompt original
 
 AGENTE 09  Dev Frontend
