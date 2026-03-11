@@ -21,7 +21,7 @@ Ler o documento do Agente 02 (Analista de Tela) e produzir arquitetura backend c
 
 ## Estrutura obrigatoria
 ```text
-backend/app/
+backend/
   main.py
   routers/
     [modulo].py

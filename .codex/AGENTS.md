@@ -87,6 +87,17 @@ Saida: mockado clicavel + pasta mocks + ambiente mock
 - Em caso de duvida de etapa, voltar para a pergunta do PRD e identificar ultimo artefato aprovado.
 - Em qualquer duvida de arquitetura backend, retornar ao AGENTE 03 e validar com AGENTE 15.
 
+## Regras de arquitetura frontend (obrigatorias)
+- O `AGENTE 04 - Arquiteto IT Valley Frontend` e a fonte da verdade da arquitetura frontend.
+- Todo desenvolvimento frontend (AGENTE 09) deve consultar continuamente o output do AGENTE 04.
+- Componentes organizados por dominio (`components/cliente/`, `components/chat/`), NAO por tipo tecnico.
+- DTOs imutaveis com `readonly`, `constructor(Record)`, `isValid()`, `toPayload()`.
+- Services com metodos `static` — NUNCA acessam campos do DTO, so metodos publicos.
+- Repositories alternam mock/real via `VITE_USE_MOCK`.
+- Design tokens centralizados no `app.css` (cores via `@theme`, espacamentos via classes CSS).
+- Import direto do arquivo, sem barrel exports.
+- O AGENTE 15 valida conformidade tanto backend quanto frontend.
+
 ## Estrutura esperada no repositorio
 - `.codex/agents/<agente>/SKILL.md`
 - `.claude/agents/<agente>/CLAUDE.md`

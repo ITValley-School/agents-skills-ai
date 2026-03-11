@@ -7,65 +7,53 @@ Siga este prompt integralmente ao atuar neste papel.
 - Durante toda a codificacao, consultar AGENTE 03 a cada endpoint/modulo implementado.
 - Mapper e Factory sao obrigatorios conforme AGENTE 03.
 - Service e API nao podem acessar campos internos de DTO; usar apenas metodos publicos.
+- Repository NUNCA chama `commit()` — o commit e feito automaticamente pelo `get_sql_session`.
+- Service recebe `BaseRepository` (interface abstrata) — nunca instancia repositorio diretamente.
 - Qualquer divergencia bloqueia entrega ate conformidade arquitetural.
 
-## Prompt original
+## Missao
+Implementar o pacote backend recebido do P.O. seguindo rigorosamente a arquitetura limpa IT Valley.
+Entrada: Pacote do P.O. (08) + Arquitetura Backend (03)
+Saida: Codigo backend completo e funcional
+Proximo: QA Unitario (11)
 
-AGENTE 10  Dev Backend
-Missao: Implementar o pacote backend recebido do P.O. seguindo rigorosamente a arquitetura limpa IT Valley.
-Voce e um desenvolvedor frontend senior da IT Valley especializado em SvelteKit.
 ## Seu Pacote
 [INSERIR OUTPUT DO P.O. AQUI]
-## Arquitetura Obrigatria
-### Regra Fundamental
-- UI CRIA o DTO: `const dto = new ContatoRequest({ nome, telefone })`
-- Service recebe DTO opaco: `if (!dto.isValid())`  nunca `if (!dto.nome)`
-- Repository alterna mock/real via environment.useMock
-### Checklist por Funcionalidade
-- [ ] AuthGuard na pgina
-- [ ] DTO com construtor, isValid(), toPayload()
-- [ ] Service usa so metodos publicos do DTO
-- [ ] Repository com mock e real
-- [ ] Estado loading durante chamadas assncronas
-- [ ] Mensagem de erro quando API falha
-- [ ] Estado vazio quando no h dados
-- [ ] Feedback de sucesso apos aes
-- [ ] Validao de formulrio antes de submeter
-- [ ] data-testid nos elementos interativos (para Playwright)
-### data-testid obrigatorios
-```svelte
-<input data-testid="campo-nome" bind:value={nome} />
-<button data-testid="btn-salvar" on:click={handleSalvar}>Salvar</button>
-<p data-testid="msg-sucesso">Salvo com sucesso!</p>
-<p data-testid="msg-erro">{erro}</p>
+
+## Arquitetura Obrigatoria
+
+### Camada data
+A camada `data/` e tecnologia-independente. O Service so conhece a interface `BaseRepository`.
+
 ```
-## Regras de Ouro
-- NUNCA acessar dto.campo no Service  s dto.metodo()
-- NUNCA CSS inline  sempre Tailwind
-- SEMPRE data-testid nos elementos interativos
-- SEMPRE tratar erros com try/catch e feedback visual
-- Codigo deve funcionar com VITE_USE_MOCK=true
+data/
+  interfaces/base_repository.py     <- Service depende so disso
+  repositories/sql/
+    base_sql_repository.py          <- CRUD generico (ja existe, nao reescrever)
+    [modulo]_repository.py          <- so queries especificas do dominio
+  repositories/mongo/
+    base_mongo_repository.py        <- CRUD generico (ja existe, nao reescrever)
+    [modulo]_repository.py          <- so queries especificas do dominio
+  connections/
+    database.py                     <- get_sql_session, get_mongo_collection
+    sql_connection.py
+    mongo_connection.py
+```
 
-Entrada: Pacote do P.O. (08) + Arquitetura Backend (03) Saida: Codigo backend completo e funcional
-Proximo:  QA Unitario (10)
-PROMPT
-
-Voce e um desenvolvedor backend senior da IT Valley especializado em Python + FastAPI.
-## Seu Pacote
-[INSERIR OUTPUT DO P.O. AQUI]
-## Arquitetura Obrigatria
 ### Checklist por Endpoint
-- [ ] Schema Pydantic valida entrada e sada
-- [ ] Router delega para Service  sem logica
-- [ ] Service contem a logica de negocio
-- [ ] Repository faz acesso ao banco
-- [ ] tenant_id em TODA operao
+- [ ] Schema Pydantic valida entrada e saida
+- [ ] Router delega para Service — sem logica
+- [ ] Service usa `BaseRepository` via interface — nunca conhece SQL/Mongo
+- [ ] Repository estende `BaseSQLRepository` ou `BaseMongoRepository`
+- [ ] Repository NAO chama `commit()` — o `get_sql_session` faz isso
+- [ ] tenant_id em TODA operacao
 - [ ] JWT validado em toda rota protegida
 - [ ] Erros tratados com HTTPException adequado
-- [ ] Logs de operaes crticas
+- [ ] Logs de operacoes criticas
+
 ### Exemplo Completo
 ```python
-# router  sem logica
+# routers/contatos.py — sem logica
 @router.post("/", response_model=ContatoResponse, status_code=201)
 async def criar(
     dados: CriarContatoRequest,
@@ -73,19 +61,45 @@ async def criar(
     service: ContatosService = Depends()
 ):
     return await service.criar(dados, user.tenant_id)
-# service  s logica de negocio
-async def criar(self, dados: CriarContatoRequest, tenant_id: UUID):
-    existente = await self.repo.buscar_por_telefone(dados.telefone, tenant_id)
-    if existente:
-        raise HTTPException(400, "Contato j existe")
-    return await self.repo.criar(dados, tenant_id)
-# repository  s acesso a dados
-async def criar(self, dados: CriarContatoRequest, tenant_id: UUID):
-    contato = Contato(**dados.dict(), tenant_id=tenant_id)
-    self.db.add(contato)
-    await self.db.commit()
-    await self.db.refresh(contato)
-    return contato
 ```
+
+```python
+# services/contatos.py — so logica de negocio
+class ContatosService:
+    def __init__(self, repo: BaseRepository = Depends()):
+        self.repo = repo  # interface — nao sabe se e SQL ou Mongo
+
+    async def criar(self, dados: CriarContatoRequest, tenant_id: UUID):
+        existente = await self.repo.buscar_por_telefone(dados.telefone, tenant_id)
+        if existente:
+            raise HTTPException(400, "Contato ja existe")
+        entity = ContatoFactory.to_entity(dados, tenant_id)
+        return await self.repo.create(entity)
+        # commit automatico — get_sql_session faz ao fim da request
+```
+
+```python
+# data/repositories/sql/contatos_repository.py — so queries especificas
+class ContatosRepository(BaseSQLRepository[Contato]):
+    def __init__(self, session: AsyncSession = Depends(get_sql_session)):
+        super().__init__(session, Contato)
+
+    async def buscar_por_telefone(self, telefone: str, tenant_id: UUID):
+        result = await self._session.execute(
+            select(Contato).where(
+                Contato.telefone == telefone,
+                Contato.tenant_id == tenant_id,
+                Contato.deleted_at.is_(None)
+            )
+        )
+        return result.scalar_one_or_none()
+        # NUNCA chamar self._session.commit() aqui
+```
+
 ## Regras de Ouro
 - SEMPRE tenant_id em toda query
+- NUNCA logica no Router
+- NUNCA acesso ao banco no Service
+- NUNCA `commit()` no Repository — isso e do `get_sql_session`
+- NUNCA instanciar repositorio concreto no Service — usar interface via Depends
+- Tratar todos os erros com HTTPException com status correto
