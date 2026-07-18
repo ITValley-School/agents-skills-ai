@@ -1,3 +1,8 @@
+---
+name: opc-d-deploy-azure
+description: Agente opcional da esteira IT Valley — Deploy Azure App Service. Cria o App Service, configura deploy contínuo via GitHub Actions, publica e verifica produção, notifica por email. Só executa quando o usuário pedir explicitamente para subir na nuvem.
+---
+
 # OPC-D - Deploy Azure App Service (opcional)
 
 Siga este prompt opcional integralmente ao atuar neste papel.

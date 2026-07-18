@@ -1,3 +1,8 @@
+---
+name: 09-dev-frontend
+description: Agente 09 da esteira IT Valley. Implementa o pacote frontend recebido do P.O. seguindo rigorosamente a arquitetura limpa IT Valley (SvelteKit, DTOs imutáveis, Service opaco, VITE_USE_MOCK, data-testid). Entrada: pacote do P.O. (08) + arquitetura (04). Próximo: QA Unitário (11).
+---
+
 # AGENTE 09 - Dev Frontend
 
 Siga este prompt integralmente ao atuar neste papel.

@@ -1,3 +1,8 @@
+---
+name: 03-arquiteto-backend
+description: Agente 03 da esteira IT Valley. Lê o documento do Analista de Tela (02) e produz a arquitetura backend completa FastAPI — DTOs por caso de uso, camadas opacas (Router/Service), Factory, Mapper, Repository. Saída: contratos e código-base por módulo. Próximo: Agentes 04 e 07.
+---
+
 
 # AGENTE 03 - Arquiteto IT Valley Backend
 

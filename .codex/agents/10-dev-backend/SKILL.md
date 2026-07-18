@@ -3,9 +3,10 @@ name: 10-dev-backend
 description: Agente 10 da esteira IT Valley. Use para implementar o pacote backend Python/FastAPI recebido do P.O. seguindo rigorosamente a arquitetura limpa IT Valley com camada data tecnologia-independente e orientacao a caso de uso. O Agente 03 e a fonte de verdade. Acionado apos Agente 08.
 ---
 
+
 # AGENTE 10 - Dev Backend
 
-Siga este prompt integralmente ao atuar neste papel.
+Use este guia como instrucao operacional.
 
 ## Regra de dependencia arquitetural (obrigatoria)
 - O AGENTE 03 e fonte de verdade do backend.

@@ -5,7 +5,7 @@ description: Executar o papel opcional 'Deploy Azure App Service' na esteira IT 
 
 # OPC-D - Deploy Azure App Service (opcional)
 
-Use este guia como instrucao operacional opcional.
+Use este guia como instrucao operacional.
 
 ## Quando usar
 Projetos que precisam ser publicados no Azure App Service da IT Valley.
@@ -47,76 +47,167 @@ az webapp create \
 ### 3. Habilitar Basic Auth (SCM e FTP)
 Obrigatorio para que o publish profile funcione no GitHub Actions.
 ```bash
-az resource update --resource-group rg-webapps --name scm --namespace Microsoft.Web \
-  --resource-type basicPublishingCredentialsPolicies --parent sites/app-{nome} \
+# Habilitar basic auth no SCM
+az resource update \
+  --resource-group rg-webapps \
+  --name scm \
+  --namespace Microsoft.Web \
+  --resource-type basicPublishingCredentialsPolicies \
+  --parent sites/app-{nome} \
   --set properties.allow=true
 
-az resource update --resource-group rg-webapps --name ftp --namespace Microsoft.Web \
-  --resource-type basicPublishingCredentialsPolicies --parent sites/app-{nome} \
+# Habilitar basic auth no FTP
+az resource update \
+  --resource-group rg-webapps \
+  --name ftp \
+  --namespace Microsoft.Web \
+  --resource-type basicPublishingCredentialsPolicies \
+  --parent sites/app-{nome} \
   --set properties.allow=true
 ```
 
 ### 4. Configurar startup e always-on
 ```bash
-az webapp config set --resource-group rg-webapps --name app-{nome} \
-  --startup-file "node build/index.js" --always-on true
+az webapp config set \
+  --resource-group rg-webapps \
+  --name app-{nome} \
+  --startup-file "node build/index.js" \
+  --always-on true
 ```
 
 ### 5. Configurar variaveis de ambiente
 ```bash
-az webapp config appsettings set --resource-group rg-webapps --name app-{nome} \
-  --settings ORIGIN=https://app-{nome}.azurewebsites.net {demais variaveis}
+az webapp config appsettings set \
+  --resource-group rg-webapps \
+  --name app-{nome} \
+  --settings \
+    ORIGIN=https://app-{nome}.azurewebsites.net \
+    {demais variaveis do .env do projeto}
 ```
+NUNCA incluir .env no repositorio. Variaveis vao direto no App Service.
 
-### 6. Obter Publish Profile (sem BOM)
-```powershell
-[System.IO.File]::WriteAllText('C:\temp\pub-profile.xml',
-  (az webapp deployment list-publishing-profiles --resource-group rg-webapps --name app-{nome} --xml))
-```
+### 6. Obter Publish Profile e salvar no GitHub
 ```bash
+# Salvar sem BOM (importante!)
+[System.IO.File]::WriteAllText(
+  'C:\temp\pub-profile.xml',
+  (az webapp deployment list-publishing-profiles --resource-group rg-webapps --name app-{nome} --xml)
+)
+
+# Setar como secret no repositorio
 gh secret set AZURE_WEBAPP_PUBLISH_PROFILE < /c/temp/pub-profile.xml
 ```
 
 ### 7. Criar GitHub Actions workflow
-Arquivo `.github/workflows/master_app-{nome}.yml` com build + deploy usando `azure/webapps-deploy@v3`.
+Criar arquivo `.github/workflows/master_app-{nome}.yml`:
+```yaml
+name: Build and deploy to Azure - app-{nome}
 
-### 8. Disparar, monitorar e verificar
-```bash
-gh workflow run master_app-{nome}.yml --ref master
-gh run watch {run_id} --exit-status
-curl -s https://app-{nome}.azurewebsites.net
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build SvelteKit
+        run: npm run build
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cp -r build deploy/build
+          cp package.json deploy/
+          cp package-lock.json deploy/
+          cd deploy && npm ci --omit=dev
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: deploy
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'app-{nome}'
+          slot-name: 'Production'
+          package: .
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 ```
 
-### 9. Notificar por email
+### 8. Disparar e monitorar deploy
+```bash
+# Push dispara automaticamente, ou forcar:
+gh workflow run master_app-{nome}.yml --ref master
+
+# Monitorar:
+gh run watch {run_id} --exit-status
+```
+
+### 9. Verificar em producao
+```bash
+# Health check
+curl -s https://app-{nome}.azurewebsites.net
+
+# Se tiver API, testar endpoint principal
+curl -s https://app-{nome}.azurewebsites.net/api/{endpoint}
+```
+
+### 10. Notificar por email
+Ao concluir, enviar notificacao via SendNotification API:
 ```bash
 curl -X POST https://app-sendnotificationcarlos.azurewebsites.net/api/notify \
-  -H "Authorization: Bearer itvalley-notify-2026-secret" \
   -H "Content-Type: application/json" \
-  -d '{"subject":"Deploy concluido","message":"app-{nome} rodando em producao"}'
+  -H "Authorization: Bearer itvalley-notify-2026-secret" \
+  -d '{
+    "subject": "Deploy concluido - app-{nome}",
+    "message": "O sistema app-{nome} foi publicado com sucesso.\n\nURL: https://app-{nome}.azurewebsites.net\nRepo: https://github.com/cacaviana/{repo}\nStatus: rodando em producao"
+  }'
 ```
 
-## Checklist
-- [ ] App Service criado no plano app-n8n-itvalley
+## Checklist de verificacao
+
+- [ ] App Service criado no plano `app-n8n-itvalley`
 - [ ] Basic Auth habilitado (SCM + FTP)
-- [ ] Variaveis configuradas (sem .env no repo)
-- [ ] Publish profile sem BOM como secret no GitHub
-- [ ] GitHub Actions workflow funcionando
-- [ ] Deploy continuo ativo
-- [ ] Sistema respondendo HTTP 200
-- [ ] Email enviado
+- [ ] Variaveis de ambiente configuradas (sem .env no repo)
+- [ ] Publish profile salvo como secret no GitHub (sem BOM)
+- [ ] GitHub Actions workflow criado e funcionando
+- [ ] Deploy continuo ativo (push = deploy)
+- [ ] Sistema respondendo em producao (HTTP 200)
+- [ ] Email de notificacao enviado
 
 ## Erros comuns
-| Erro | Solucao |
-|------|---------|
-| Publish profile invalid | Habilitar Basic Auth primeiro |
-| BOM no publish profile | Usar `[System.IO.File]::WriteAllText()` |
-| 502 Bad Gateway | Setar startup-file correto |
-| DB timeout | Liberar firewall Azure SQL (0.0.0.0) |
-| $env/static falha em CI | Usar $env/dynamic/private |
+
+| Erro | Causa | Solucao |
+|------|-------|---------|
+| Publish profile invalid | Basic Auth desabilitado no SCM | Habilitar via `az resource update` |
+| Publish profile com BOM | PowerShell adiciona BOM ao redirecionar | Usar `[System.IO.File]::WriteAllText()` |
+| App Service 502 | Startup command errado | Setar `--startup-file "node build/index.js"` |
+| Timeout na conexao DB | Firewall do Azure SQL | `az sql server firewall-rule create ... --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0` |
+| $env/static nao funciona em CI | Variaveis nao disponiveis em build time | Usar `$env/dynamic/private` |
 
 ## Regras de Ouro
 - NUNCA commitar .env ou secrets no repositorio
 - SEMPRE habilitar Basic Auth ANTES de pegar o publish profile
-- SEMPRE usar $env/dynamic/private em SvelteKit
-- SEMPRE verificar producao antes de notificar
-- SEMPRE enviar email ao concluir
+- SEMPRE usar `$env/dynamic/private` em SvelteKit (nunca static para secrets)
+- SEMPRE verificar que o sistema responde em producao antes de notificar
+- SEMPRE enviar email de notificacao ao concluir

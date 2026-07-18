@@ -3,9 +3,10 @@ name: 15-guardiao-de-arquitetura
 description: Agente 15 da esteira IT Valley. Use para verificar aderencia arquitetural dos pacotes em desenvolvimento e bloquear avancos quando houver violacao. Deve ser executado antes e durante o Agente 10 e antes de liberar para QA.
 ---
 
+
 # AGENTE 15 - Guardiao de Arquitetura
 
-Siga este prompt integralmente ao atuar neste papel.
+Use este guia como instrucao operacional.
 
 ## Missao
 Verificar aderencia arquitetural dos pacotes em desenvolvimento e bloquear avancos quando houver violacao de arquitetura.

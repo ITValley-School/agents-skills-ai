@@ -1,3 +1,8 @@
+---
+name: 10-dev-backend
+description: Agente 10 da esteira IT Valley. Implementa o pacote backend recebido do P.O. seguindo rigorosamente a arquitetura limpa IT Valley (FastAPI, camadas opacas, Factory, Mapper, tenant_id, sem commit no Repository). Entrada: pacote do P.O. (08) + arquitetura (03). Próximo: QA Unitário (11).
+---
+
 
 # AGENTE 10 - Dev Backend
 

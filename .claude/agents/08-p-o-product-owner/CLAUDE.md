@@ -1,3 +1,8 @@
+---
+name: 08-po-product-owner
+description: Agente 08 da esteira IT Valley. Divide o sistema em domínios e casos de uso (dev features), mapeia dependências, define ordem e prepara pacotes 100% autossuficientes para cada dev. Entrada: PRD + Telas + Arquiteturas + SQL. Próximo: Dev Front (09) e Dev Back (10) em paralelo.
+---
+
 
 # AGENTE 08 - P.O. (Product Owner)
 

@@ -1,3 +1,8 @@
+---
+name: 04-arquiteto-frontend
+description: Agente 04 da esteira IT Valley. Lê o documento de telas (02) e os contratos do backend (03) e produz a arquitetura frontend SvelteKit completa — DTOs imutáveis, Services opacos, Repositories com VITE_USE_MOCK, organização por domínio. Próximo: Dev Mockado (06) e Dev Front (09).
+---
+
 
 # AGENTE 04 - Arquiteto IT Valley Frontend
 

@@ -5,7 +5,7 @@ description: Agente 06 da esteira IT Valley. Use para criar o prototipo clicavel
 
 # AGENTE 06 - Dev Mockado
 
-Siga este prompt integralmente ao atuar neste papel.
+Use este guia como instrucao operacional.
 
 ## Missao
 Criar o mockado clicavel completo em SvelteKit com dados falsos realistas. O cliente valida o fluxo completo antes do backend existir. Cria a pasta /mocks que todos os outros devs vao usar.
@@ -58,6 +58,7 @@ export const clientesMock = [
   // VARIEDADE: aprovado, reprovado, edge cases
 ];
 
+// Mock de logica (opcional) — simula backend
 export function gerarAnaliseMock(clienteId: number, pergunta: string) { ... }
 ```
 
@@ -70,12 +71,13 @@ export function gerarAnaliseMock(clienteId: number, pergunta: string) { ... }
 ### 2. Repositories com Mock
 
 ```typescript
+// repositories/ClienteRepository.ts
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export class ClienteRepository {
   static async listar(): Promise<ClienteDTO[]> {
     if (USE_MOCK) {
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 300)); // Simula rede
       return clientesMock.map(c => new ClienteDTO(c));
     }
     const res = await fetch(`${API_BASE}/clientes`);
@@ -124,6 +126,7 @@ Cada pagina deve:
 ### 6. Design Tokens no app.css
 
 ```css
+/* Espacamentos globais — altere aqui para ajustar todo o app */
 .app-shell { padding: 2.5rem; }
 .sidebar-padding { padding-inline: 2rem; padding-block: 1.5rem; }
 .card-padding { padding: 1.5rem; border-radius: 1.5rem; }

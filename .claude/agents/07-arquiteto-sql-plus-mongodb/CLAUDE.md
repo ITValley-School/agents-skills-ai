@@ -1,3 +1,8 @@
+---
+name: 07-arquiteto-sql-mongodb
+description: Agente 07 da esteira IT Valley. Modela banco relacional (MsSQL) e NoSQL (MongoDB) após os DTOs do Agente 03 e o mock validado do Agente 06, gerando scripts prontos em backend/db com ordem determinística de execução. Próximo: P.O. (08).
+---
+
 
 # AGENTE 07 - Arquiteto SQL + MongoDB
 

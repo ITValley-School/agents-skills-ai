@@ -1,3 +1,8 @@
+---
+name: 06-dev-mockado
+description: Agente 06 da esteira IT Valley. Cria o mockado clicável completo em SvelteKit com dados falsos realistas para o cliente validar o fluxo antes do backend existir. Cria a pasta /mocks usada por todos os devs. Entrada: Arquitetos 04 e 05. Próximo: cliente valida, depois Agente 07.
+---
+
 # AGENTE 06 - Dev Mockado
 
 Siga este prompt integralmente ao atuar neste papel.

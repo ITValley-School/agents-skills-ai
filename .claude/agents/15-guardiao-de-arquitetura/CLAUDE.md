@@ -1,3 +1,8 @@
+---
+name: 15-guardiao-de-arquitetura
+description: Agente 15 da esteira IT Valley. Verifica aderência arquitetural dos pacotes em desenvolvimento e bloqueia avanços quando há violação. Fonte de verdade: Agentes 03 (backend), 04 (frontend), 02 (telas), 05 (design). Executa antes, durante e após o Agente 10, e antes de liberar para QA.
+---
+
 
 # AGENTE 15 - Guardiao de Arquitetura
 

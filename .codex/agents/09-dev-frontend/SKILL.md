@@ -5,7 +5,7 @@ description: Agente 09 da esteira IT Valley. Use para implementar o pacote front
 
 # AGENTE 09 - Dev Frontend
 
-Siga este prompt integralmente ao atuar neste papel.
+Use este guia como instrucao operacional.
 
 ## Regra de dependencia arquitetural
 - Consultar continuamente o AGENTE 03 (contratos backend) e AGENTE 04 (arquitetura frontend).
@@ -50,6 +50,7 @@ src/lib/
 
 ### 1. UI e a Fabrica de DTOs
 ```svelte
+<!-- +page.svelte — UI cria o DTO -->
 const dto = new ClienteDTO(data);
 const resultado = await ClienteService.buscar(dto.id);
 ```
@@ -62,7 +63,7 @@ static async criar(dto) {
   return await Repository.criar(dto.toPayload());
 }
 
-// ERRADO
+// ERRADO — acessando campo direto
 if (!dto.nome) throw new Error('Nome vazio');
 ```
 
@@ -99,15 +100,17 @@ export class ClienteDTO {
 ### 5. Componentes com $props() e $derived()
 ```svelte
 <script lang="ts">
+  import type { ClienteDTO } from '$lib/dtos/ClienteDTO';
   let { cliente }: { cliente: ClienteDTO } = $props();
   const scoreCor = $derived(cliente.score >= 700 ? 'bg-green' : 'bg-red');
 </script>
 ```
 
 ### 6. Design tokens no app.css
-- Espacamentos globais sao classes CSS no `app.css`
+- Espacamentos globais sao classes CSS no `app.css` (`.card-padding`, `.sidebar-padding`)
 - Cores via `@theme` do Tailwind
 - Componente usa a classe, nao hardcoda valores
+- Muda 1 valor no app.css → todo o app reflete
 
 ---
 
